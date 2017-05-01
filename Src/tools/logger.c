@@ -3,12 +3,12 @@
 void LOG_init(){
 	logSem = xSemaphoreCreateMutex();
 }
-void LOG(uint8_t * mode,char* toLog,uint32_t size){
+void LOG(uint8_t mode,char* toLog,uint32_t size){
 #ifdef LOG_LVL
 	xSemaphoreTake(logSem,portMAX_DELAY);
-	if(LOG_LVL>=(*mode)){
+	if(LOG_LVL>=(mode)){
 
-		switch (*mode) {
+		switch (mode) {
 
 			case 0:
 				HAL_UART_Transmit(&LOG_UART_Handler,(uint8_t *) "[ERROR] ",8,portMAX_DELAY);

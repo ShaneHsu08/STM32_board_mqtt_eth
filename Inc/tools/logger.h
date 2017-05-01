@@ -15,7 +15,7 @@ SemaphoreHandle_t logSem;
 #define LOG_UART_Handler huart4
 
 void LOG_init();
-void LOG(uint8_t * mode,char* toLog,uint32_t size);
+void LOG(uint8_t mode,char* toLog,uint32_t size);
 
 #endif
 

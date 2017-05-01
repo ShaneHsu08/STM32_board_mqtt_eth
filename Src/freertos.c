@@ -48,13 +48,16 @@
 
 /* USER CODE BEGIN Includes */     
 #include "usart.h"
+#include "i2c.h"
 
 #include "logger.h"
+#include "LPS331AP.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 osThreadId UartControlHandle;
+osThreadId LPS331MeasuHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -63,6 +66,7 @@ osThreadId UartControlHandle;
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
 void UartControlFunction(void const * argument);
+void LPS331MeasureFunction(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -101,6 +105,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(UartControl, UartControlFunction, osPriorityIdle, 0, 128);
   UartControlHandle = osThreadCreate(osThread(UartControl), NULL);
 
+  /* definition and creation of LPS331Measu */
+  osThreadDef(LPS331Measu, LPS331MeasureFunction, osPriorityHigh, 0, 128);
+  LPS331MeasuHandle = osThreadCreate(osThread(LPS331Measu), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -120,11 +128,11 @@ void StartDefaultTask(void const * argument)
   {
 
 	  // internall buffer
-	  char buffer[40];
-	  uint32_t size =  sprintf(buffer,"Hellow %d",23);
+	//  char buffer[40];
+	//  uint32_t size =  sprintf(buffer,"Hellow %d",23);
 	  // task blocking send
-	  LOG(LOG_ERROR,buffer,size);
-	  osDelay(10);
+	//  LOG(LOG_ERROR,buffer,size);
+	  osDelay(10000);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -136,14 +144,41 @@ void UartControlFunction(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  // internall buffer
-	  char buffer[40];
-	  uint32_t size =  sprintf(buffer,"Hi %d",23);
-	  // task blocking send
-	  LOG(LOG_ERROR,buffer,size);
-	  osDelay(10);
+	  // internall buffe
+	  osDelay(10000);
   }
   /* USER CODE END UartControlFunction */
+}
+
+/* LPS331MeasureFunction function */
+void LPS331MeasureFunction(void const * argument)
+{
+  /* USER CODE BEGIN LPS331MeasureFunction */
+  /* Infinite loop */
+
+  // TODO make it secure
+  LPS331AP_device lps331;
+  lps331.ctrl_reg1 =LPS331A_POWER_UP | LPS331A_ODR_PRESSURE_1_HZ_TEMPERATURE_1_HZ;
+  lps331.ctrl_reg3 = 0;
+  // HAL BUG
+  lps331.address = 0x5D<<1;
+  lps331.res_conf = LPS331A_PRESSURE_384_SAMPLE_AVG | LPS331A_TEMPERATURE_128_SAMPLE_AVG;
+  lps331.i2cSource= &hi2c1;
+
+  uint8_t status = LPS331APInit(&lps331);
+
+  char buffer[40];
+  uint32_t size =  sprintf(buffer,"LPS init status %d",status);
+  // task blocking send
+  LOG(LOG_MSG,buffer,size);
+
+  for(;;)
+  {
+	  float x,y;
+    LPS331APRead(&lps331,&x,&y);
+    osDelay(1000);
+  }
+  /* USER CODE END LPS331MeasureFunction */
 }
 
 /* USER CODE BEGIN Application */
