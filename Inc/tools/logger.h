@@ -11,8 +11,8 @@ SemaphoreHandle_t logSem;
 #define LOG_WARN 1
 #define LOG_MSG 2
 
-#define LOG_LVL 2
-#define UART_Handler huart4
+#define LOG_LVL LOG_MSG
+#define LOG_UART_Handler huart4
 
 void LOG_init();
 void LOG(uint8_t * mode,char* toLog,uint32_t size);
