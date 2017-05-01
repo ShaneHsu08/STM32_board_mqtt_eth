@@ -47,18 +47,32 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+osThreadId UartControlHandle;
 
 /* USER CODE BEGIN Variables */
+extern int _write(int file, char *ptr, int len)
+{
+    int i;
+    file = file;
+    for (i = 0; i < len; i++)
+    {
+    	HAL_UART_Transmit(&huart4,&ptr[i],1,100);
+        //UART_PutByte(*ptr++);
+    }
+    return len;
+}
+
 
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const * argument);
+void UartControlFunction(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -92,6 +106,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of UartControl */
+  osThreadDef(UartControl, UartControlFunction, osPriorityIdle, 0, 128);
+  UartControlHandle = osThreadCreate(osThread(UartControl), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -109,9 +127,26 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
+}
+
+/* UartControlFunction function */
+void UartControlFunction(void const * argument)
+{
+  /* USER CODE BEGIN UartControlFunction */
+  /* Infinite loop */
+  for(;;)
+  {
+	  // internall buffer
+	  char buffer[40];
+	  uint32_t size =  sprintf(buffer,"Hi %d",23);
+	  // task blocking send
+	  HAL_UART_Transmit(&huart4,(uint8_t *) buffer,size,200);
+	  osDelay(1000);
+  }
+  /* USER CODE END UartControlFunction */
 }
 
 /* USER CODE BEGIN Application */
