@@ -48,6 +48,8 @@
 
 /* USER CODE BEGIN Includes */     
 #include "usart.h"
+
+#include "logger.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -55,18 +57,6 @@ osThreadId defaultTaskHandle;
 osThreadId UartControlHandle;
 
 /* USER CODE BEGIN Variables */
-extern int _write(int file, char *ptr, int len)
-{
-    int i;
-    file = file;
-    for (i = 0; i < len; i++)
-    {
-    	HAL_UART_Transmit(&huart4,&ptr[i],1,100);
-        //UART_PutByte(*ptr++);
-    }
-    return len;
-}
-
 
 /* USER CODE END Variables */
 
@@ -91,6 +81,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+  LOG_init();
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -127,7 +118,13 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1000);
+
+	  // internall buffer
+	  char buffer[40];
+	  uint32_t size =  sprintf(buffer,"Hellow %d",23);
+	  // task blocking send
+	  LOG(LOG_ERROR,buffer,size);
+	  osDelay(10);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -143,8 +140,8 @@ void UartControlFunction(void const * argument)
 	  char buffer[40];
 	  uint32_t size =  sprintf(buffer,"Hi %d",23);
 	  // task blocking send
-	  HAL_UART_Transmit(&huart4,(uint8_t *) buffer,size,200);
-	  osDelay(1000);
+	  LOG(LOG_ERROR,buffer,size);
+	  osDelay(10);
   }
   /* USER CODE END UartControlFunction */
 }
