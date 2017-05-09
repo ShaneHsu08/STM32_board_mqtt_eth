@@ -1,7 +1,8 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,FootprintOK,configGENERATE_RUN_TIME_STATS,configMAX_TASK_NAME_LEN,configTOTAL_HEAP_SIZE
-FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LPS331Measu,2,128,LPS331MeasureFunction,Default,NULL,Dynamic,NULL,NULL;iwdtTask,3,128,iwdtTaskFunction,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.INCLUDE_uxTaskGetStackHighWaterMark=1
+FREERTOS.IPParameters=Tasks01,FootprintOK,configGENERATE_RUN_TIME_STATS,configMAX_TASK_NAME_LEN,configTOTAL_HEAP_SIZE,INCLUDE_uxTaskGetStackHighWaterMark
+FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LPS331Measu,2,128,LPS331MeasureFunction,Default,NULL,Dynamic,NULL,NULL;iwdtTask,3,128,iwdtTaskFunction,Default,NULL,Dynamic,NULL,NULL;UIP_periodi,3,512,vTask_uIP_periodic,Default,NULL,Dynamic,NULL,NULL;UIP,-3,512,vTask_uIP,Default,NULL,Dynamic,NULL,NULL
 FREERTOS.configGENERATE_RUN_TIME_STATS=0
 FREERTOS.configMAX_TASK_NAME_LEN=12
 FREERTOS.configTOTAL_HEAP_SIZE=36864
