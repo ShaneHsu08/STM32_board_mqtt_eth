@@ -45,7 +45,7 @@
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include "i2c.h"
-#include "iwdg.h"
+#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -95,14 +95,14 @@ int main(void)
   MX_GPIO_Init();
   MX_UART4_Init();
   MX_I2C1_Init();
-  MX_IWDG_Init();
+  MX_SPI2_Init();
 
   /* USER CODE BEGIN 2 */
   struct uip_eth_addr mac;
   mac.addr[0]=0x00;
   mac.addr[1]=0x01;
   mac.addr[2]=0x02;
-  mac.addr[3]=0x03;
+  mac.addr[3]=0x23;
   mac.addr[4]=0x04;
   mac.addr[5]=0x00;
   enc28j60_init(mac.addr);
@@ -115,7 +115,7 @@ int main(void)
   uip_setethaddr(mac);
 
   uip_ipaddr_t ipaddr;
-  uip_ipaddr(ipaddr, 192, 168, 3, 100);
+  uip_ipaddr(ipaddr, 192, 168, 3, 111);
   uip_sethostaddr(ipaddr);
   uip_ipaddr(ipaddr, 192, 168, 3, 1);
   uip_setdraddr(ipaddr);
@@ -155,10 +155,9 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;

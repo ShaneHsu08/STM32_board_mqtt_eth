@@ -51,6 +51,11 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define SOFT_CS_Pin GPIO_PIN_12
+#define SOFT_CS_GPIO_Port GPIOB
+#define SPI2_RESET_Pin GPIO_PIN_6
+#define SPI2_RESET_GPIO_Port GPIOC
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

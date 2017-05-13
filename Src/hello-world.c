@@ -89,7 +89,7 @@ handle_connection(struct hello_world_state *s)
   PSOCK_BEGIN(&s->p);
 
   PSOCK_SEND_STR(&s->p, "Hello. What is your name?\n");
-  PSOCK_READTO(&s->p, '\n');
+  PSOCK_READTO(&s->p, 'T');
   strncpy(s->name, s->inputbuffer, sizeof(s->name));
   PSOCK_SEND_STR(&s->p, "Hello ");
   PSOCK_SEND_STR(&s->p, s->name);

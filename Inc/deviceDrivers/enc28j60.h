@@ -1,7 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-
+#include "spi.h"
+#include "gpio.h"
 
 //#define ENC28J60_SPI_DDR	DDRB
 //#define ENC28J60_SPI_PORT	PORTB

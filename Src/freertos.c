@@ -1,56 +1,56 @@
 /**
- ******************************************************************************
- * File Name          : freertos.c
- * Description        : Code for freertos applications
- ******************************************************************************
- *
- * Copyright (c) 2017 STMicroelectronics International N.V.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
- *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
- */
+  ******************************************************************************
+  * File Name          : freertos.c
+  * Description        : Code for freertos applications
+  ******************************************************************************
+  *
+  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without 
+  * modification, are permitted, provided that the following conditions are met:
+  *
+  * 1. Redistribution of source code must retain the above copyright notice, 
+  *    this list of conditions and the following disclaimer.
+  * 2. Redistributions in binary form must reproduce the above copyright notice,
+  *    this list of conditions and the following disclaimer in the documentation
+  *    and/or other materials provided with the distribution.
+  * 3. Neither the name of STMicroelectronics nor the names of other 
+  *    contributors to this software may be used to endorse or promote products 
+  *    derived from this software without specific written permission.
+  * 4. This software, including modifications and/or derivative works of this 
+  *    software, must execute solely and exclusively on microcontroller or
+  *    microprocessor devices manufactured by or for STMicroelectronics.
+  * 5. Redistribution and use of this software other than as permitted under 
+  *    this license is void and will automatically terminate your rights under 
+  *    this license. 
+  *
+  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
+  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
+  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
+  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
+  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  *
+  ******************************************************************************
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
 
-/* USER CODE BEGIN Includes */
+/* USER CODE BEGIN Includes */     
 #include "userDefines.h"
 #include "usart.h"
 #include "i2c.h"
-#include "iwdg.h"
+//#include "iwdg.h"
 #include "logger.h"
 #include "LPS331AP.h"
 
@@ -68,8 +68,8 @@
 osThreadId defaultTaskHandle;
 osThreadId LPS331MeasuHandle;
 osThreadId iwdtTaskHandle;
-osThreadId UIP_periodiHandle;
-osThreadId UIPHandle;
+osThreadId stack_perHandle;
+osThreadId stackHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -79,8 +79,8 @@ osThreadId UIPHandle;
 void StartDefaultTask(void const * argument);
 void LPS331MeasureFunction(void const * argument);
 void iwdtTaskFunction(void const * argument);
-void vTask_uIP_periodic(void const * argument);
-void vTask_uIP(void const * argument);
+void vTask_stack_periodic(void const * argument);
+void vTask_stack_main(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -93,71 +93,77 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 /* Init FreeRTOS */
 
 void MX_FREERTOS_Init(void) {
-	/* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
+  /* USER CODE END Init */
 
-	/* USER CODE BEGIN RTOS_MUTEX */
+  /* USER CODE BEGIN RTOS_MUTEX */
 	/* add mutexes, ... */
 	LOG_init();
-	/* USER CODE END RTOS_MUTEX */
+  /* USER CODE END RTOS_MUTEX */
 
-	/* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
 	/* add semaphores, ... */
-	/* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE END RTOS_SEMAPHORES */
 
-	/* USER CODE BEGIN RTOS_TIMERS */
+  /* USER CODE BEGIN RTOS_TIMERS */
 	/* start timers, add new ones, ... */
-	/* USER CODE END RTOS_TIMERS */
+  /* USER CODE END RTOS_TIMERS */
 
-	/* Create the thread(s) */
-	/* definition and creation of defaultTask */
-	osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-	defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-	/* definition and creation of LPS331Measu */
-	osThreadDef(LPS331Measu, LPS331MeasureFunction, osPriorityHigh, 0, 128);
-	LPS331MeasuHandle = osThreadCreate(osThread(LPS331Measu), NULL);
+  /* definition and creation of LPS331Measu */
+  osThreadDef(LPS331Measu, LPS331MeasureFunction, osPriorityHigh, 0, 128);
+  LPS331MeasuHandle = osThreadCreate(osThread(LPS331Measu), NULL);
 
-	/* definition and creation of iwdtTask */
-	osThreadDef(iwdtTask, iwdtTaskFunction, osPriorityRealtime, 0, 128);
-	iwdtTaskHandle = osThreadCreate(osThread(iwdtTask), NULL);
+  /* definition and creation of iwdtTask */
+  osThreadDef(iwdtTask, iwdtTaskFunction, osPriorityRealtime, 0, 128);
+  iwdtTaskHandle = osThreadCreate(osThread(iwdtTask), NULL);
 
-	/* definition and creation of UIP_periodi */
-	osThreadDef(UIP_periodi, vTask_uIP_periodic, osPriorityRealtime, 0, 512);
-	UIP_periodiHandle = osThreadCreate(osThread(UIP_periodi), NULL);
+  /* definition and creation of stack_per */
+  osThreadDef(stack_per, vTask_stack_periodic, osPriorityHigh, 0, 512);
+  stack_perHandle = osThreadCreate(osThread(stack_per), NULL);
 
-	/* definition and creation of UIP */
-	osThreadDef(UIP, vTask_uIP, osPriorityIdle, 0, 512);
-	UIPHandle = osThreadCreate(osThread(UIP), NULL);
+  /* definition and creation of stack */
+  osThreadDef(stack, vTask_stack_main, osPriorityHigh, 0, 512);
+  stackHandle = osThreadCreate(osThread(stack), NULL);
 
-	/* USER CODE BEGIN RTOS_THREADS */
+  /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
-	/* USER CODE END RTOS_THREADS */
+  /* USER CODE END RTOS_THREADS */
 
-	/* USER CODE BEGIN RTOS_QUEUES */
+  /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
-	/* USER CODE END RTOS_QUEUES */
+  /* USER CODE END RTOS_QUEUES */
 }
 
 /* StartDefaultTask function */
-void StartDefaultTask(void const * argument) {
+void StartDefaultTask(void const * argument)
+{
 
-	/* USER CODE BEGIN StartDefaultTask */
+  /* USER CODE BEGIN StartDefaultTask */
 	/* Infinite loop */
 	for (;;) {
 		osDelay(1000);
 		LOG(LOG_MSG, "DefaultTask", 11);
 	}
-	/* USER CODE END StartDefaultTask */
+  /* USER CODE END StartDefaultTask */
 }
 
 /* LPS331MeasureFunction function */
-void LPS331MeasureFunction(void const * argument) {
-	/* USER CODE BEGIN LPS331MeasureFunction */
+void LPS331MeasureFunction(void const * argument)
+{
+  /* USER CODE BEGIN LPS331MeasureFunction */
 	/* Infinite loop */
 
-	/**
+
+	 for (;;) {
+		osDelay(1000);
+		}
+		/**
 	 // TODO make it secure
 	 LPS331AP_device lps331;
 	 lps331.ctrl_reg1 =LPS331A_POWER_UP | LPS331A_ODR_PRESSURE_1_HZ_TEMPERATURE_1_HZ;
@@ -180,7 +186,7 @@ void LPS331MeasureFunction(void const * argument) {
 	 LPS331APRead(&lps331,&x,&y);
 	 osDelay(1000);
 	 }
-	 **/
+
 	int counter = 0;
 	for (;;) {
 		counter++;
@@ -191,12 +197,14 @@ void LPS331MeasureFunction(void const * argument) {
 		LOG(LOG_MSG, buffer, s);
 		osDelay(1000);
 	}
-	/* USER CODE END LPS331MeasureFunction */
+	*/
+  /* USER CODE END LPS331MeasureFunction */
 }
 
 /* iwdtTaskFunction function */
-void iwdtTaskFunction(void const * argument) {
-	/* USER CODE BEGIN iwdtTaskFunction */
+void iwdtTaskFunction(void const * argument)
+{
+  /* USER CODE BEGIN iwdtTaskFunction */
 	/* Infinite loop */
 
 #ifndef NO_IWDT
@@ -217,57 +225,56 @@ void iwdtTaskFunction(void const * argument) {
 	}
 #endif
 
-	/* USER CODE END iwdtTaskFunction */
+  /* USER CODE END iwdtTaskFunction */
 }
 
-/* vTask_uIP_periodic function */
-void vTask_uIP_periodic(void const * argument) {
-	/* USER CODE BEGIN vTask_uIP_periodic */
-	/* Infinite loop */
+/* vTask_stack_periodic function */
+void vTask_stack_periodic(void const * argument)
+{
+  /* USER CODE BEGIN vTask_stack_periodic */
+  /* Infinite loop */
 	uint32_t i;
-	uint8_t delay_arp = 0;
+		uint8_t delay_arp = 0;
+		volatile uint32_t st;
 
-	//volatile uint32_t st;
-
-	for (;;) {
-		vTaskDelay(configTICK_RATE_HZ / 2); // ����������
-		delay_arp++;
-		for (i = 0; i < UIP_CONNS; i++) {
-			uip_periodic(i);
-			if (uip_len > 0) {
-				uip_arp_out();
-				enc28j60_send_packet((uint8_t *) uip_buf, uip_len);
+		for (;;) {
+			vTaskDelay(configTICK_RATE_HZ/2); // ����������
+			delay_arp++;
+			for (i = 0; i < UIP_CONNS; i++) {
+				uip_periodic(i);
+				if (uip_len > 0) {
+					uip_arp_out();
+					enc28j60_send_packet((uint8_t *) uip_buf, uip_len);
+				}
 			}
-		}
 
-#if UIP_UDP
-		for(i = 0; i < UIP_UDP_CONNS; i++) {
-			uip_udp_periodic(i);
-			if(uip_len > 0) {
-				uip_arp_out();
-				network_send();
+	#if UIP_UDP
+			for(i = 0; i < UIP_UDP_CONNS; i++) {
+				uip_udp_periodic(i);
+				if(uip_len > 0) {
+					uip_arp_out();
+					network_send();
+				}
 			}
+	#endif /* UIP_UDP */
+
+			if (delay_arp >= 50) {
+				delay_arp = 0;
+				uip_arp_timer();
+			}
+
+			st = uxTaskGetStackHighWaterMark(NULL);
 		}
-#endif /* UIP_UDP */
-
-		if (delay_arp >= 50) { // ���� ��� �� 50 �������� �����, ����� 10 ���.
-			delay_arp = 0;
-			uip_arp_timer();
-		}
-
-		// foR STACK VALIDATION
-		//st = uxTaskGetStackHighWaterMark(NULL);
-	}
-
-	/* USER CODE END vTask_uIP_periodic */
+  /* USER CODE END vTask_stack_periodic */
 }
 
-/* vTask_uIP function */
-void vTask_uIP(void const * argument) {
-	/* USER CODE BEGIN vTask_uIP */
-	/* Infinite loop */
+/* vTask_stack_main function */
+void vTask_stack_main(void const * argument)
+{
+  /* USER CODE BEGIN vTask_stack_main */
+  /* Infinite loop */
+	volatile uint32_t st;
 
-	//volatile uint32_t st;
 
 	for (;;) {
 		uip_len = enc28j60_recv_packet((uint8_t *) uip_buf, UIP_BUFSIZE);
@@ -288,10 +295,9 @@ void vTask_uIP(void const * argument) {
 			}
 		}
 		taskYIELD();
-		// foR STACK VALIDATION
-		//st = uxTaskGetStackHighWaterMark(NULL);
+		st = uxTaskGetStackHighWaterMark(NULL);
 	}
-	/* USER CODE END vTask_uIP */
+  /* USER CODE END vTask_stack_main */
 }
 
 /* USER CODE BEGIN Application */

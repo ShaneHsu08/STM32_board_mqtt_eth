@@ -10,18 +10,23 @@
 volatile uint8_t enc28j60_current_bank = 0;
 volatile uint16_t enc28j60_rxrdpt = 0;
 
-//#define enc28j60_select() GPIO_ResetBits(GPIOB, GPIO_Pin_12)
-//#define enc28j60_release() GPIO_SetBits(GPIOB, GPIO_Pin_12)
-#define enc28j60_select()
-#define enc28j60_release()
+#define enc28j60_select() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,GPIO_PIN_RESET)
+#define enc28j60_release() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,GPIO_PIN_SET)
+
 
 uint8_t enc28j60_rxtx(uint8_t data)
 {
-//	while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE)==RESET);
-//	SPI_I2S_SendData(SPI2,data);
+	uint8_t results;
+	HAL_SPI_TransmitReceive(&hspi2,&data,&results,1,1000);
 
-//	while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE)==RESET);
-//	return SPI_I2S_ReceiveData(SPI2);
+	return results;
+	/*
+	while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE)==RESET);
+	SPI_I2S_SendData(SPI2,data);
+
+	while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE)==RESET);
+	return SPI_I2S_ReceiveData(SPI2);
+	*/
 }
 
 #define enc28j60_rx() enc28j60_rxtx(0xff)
@@ -59,8 +64,7 @@ void enc28j60_soft_reset()
 	
 	enc28j60_current_bank = 0;
 	volatile uint32_t i;
-	for (i=0; i<20000; i++) {
-	}
+	HAL_Delay(100);
 	//_delay_ms(1); // Wait until device initializes
 }
 
@@ -177,7 +181,6 @@ void enc28j60_write_phy(uint8_t adr, uint16_t data)
 
 void enc28j60_init(uint8_t *macadr)
 {
-	uint32_t i;
 
 
 	// Initialize SPI
@@ -235,11 +238,14 @@ void enc28j60_init(uint8_t *macadr)
 
 	*/
 
-//	enc28j60_release();
-//	 for (i=0; i<720000; i++) {
-//		 GPIO_ResetBits(GPIOA, GPIO_Pin_7);
-//	 }
-//	 GPIO_SetBits(GPIOA, GPIO_Pin_7);
+	enc28j60_release();
+
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_RESET);
+	HAL_Delay(100);
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_SET);
+
+	// wait for device setup
+	HAL_Delay(100);
 
 	// Reset ENC28J60
 	enc28j60_soft_reset();
