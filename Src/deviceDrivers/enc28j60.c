@@ -10,62 +10,58 @@
 volatile uint8_t enc28j60_current_bank = 0;
 volatile uint16_t enc28j60_rxrdpt = 0;
 
-#define enc28j60_select() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,GPIO_PIN_RESET)
-#define enc28j60_release() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,GPIO_PIN_SET)
+#define enc28j60_select() HAL_GPIO_WritePin(CS_PORT, CS_PIN,GPIO_PIN_RESET)
+#define enc28j60_release() HAL_GPIO_WritePin(CS_PORT, CS_PIN,GPIO_PIN_SET)
 
 
-uint8_t enc28j60_rxtx(uint8_t data)
-{
-	uint8_t results;
-	HAL_SPI_TransmitReceive(&hspi2,&data,&results,1,1000);
-
-	return results;
-	/*
-	while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE)==RESET);
-	SPI_I2S_SendData(SPI2,data);
-
-	while(SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_RXNE)==RESET);
-	return SPI_I2S_ReceiveData(SPI2);
-	*/
+HAL_StatusTypeDef enc28j60_tx_non_copy(uint8_t * data, uint16_t size){
+	return HAL_SPI_Transmit(&SPI_CONTROLLER,data,size,SPI_TIMEOUT);
 }
 
-#define enc28j60_rx() enc28j60_rxtx(0xff)
-#define enc28j60_tx(data) enc28j60_rxtx(data)
+HAL_StatusTypeDef enc28j60_tx(uint8_t data, uint16_t size){
+	return HAL_SPI_Transmit(&SPI_CONTROLLER,&data,size,SPI_TIMEOUT);
+}
 
-// Generic SPI read command
+HAL_StatusTypeDef enc28j60_rx(uint8_t * results, uint16_t size){
+	return HAL_SPI_Receive(&SPI_CONTROLLER,results,size,SPI_TIMEOUT);
+}
+
+HAL_StatusTypeDef enc28j60_rx_ignore_byte(){
+	uint8_t  results;
+	return HAL_SPI_Receive(&SPI_CONTROLLER, &results,1,SPI_TIMEOUT);
+}
+
 uint8_t enc28j60_read_op(uint8_t cmd, uint8_t adr)
 {
 	uint8_t data;
 
 	enc28j60_select();
-	enc28j60_tx(cmd | (adr & ENC28J60_ADDR_MASK));
-	if(adr & 0x80) // throw out dummy byte 
-		enc28j60_rx(); // when reading MII/MAC register
-	data = enc28j60_rx();
+	enc28j60_tx(cmd | (adr & ENC28J60_ADDR_MASK),1);
+
+	// ignore dummy byte if reading from MII / MAC
+	if(adr & 0x80)
+		enc28j60_rx_ignore_byte();
+	enc28j60_rx(&data,1);
 	enc28j60_release();
+
 	return data;
 }
 
-// Generic SPI write command
 void enc28j60_write_op(uint8_t cmd, uint8_t adr, uint8_t data)
 {
 	enc28j60_select();
-	enc28j60_tx(cmd | (adr & ENC28J60_ADDR_MASK));
-	enc28j60_tx(data);
+	enc28j60_tx(cmd | (adr & ENC28J60_ADDR_MASK),1);
+	enc28j60_tx(data,1);
 	enc28j60_release();
 }
 
-// Initiate software reset
 void enc28j60_soft_reset()
 {
 	enc28j60_select();
-	enc28j60_tx(ENC28J60_SPI_SC);
+	enc28j60_tx(ENC28J60_SPI_SC,1);
 	enc28j60_release();
-	
 	enc28j60_current_bank = 0;
-	volatile uint32_t i;
 	HAL_Delay(100);
-	//_delay_ms(1); // Wait until device initializes
 }
 
 
@@ -138,9 +134,8 @@ void enc28j60_bfs(uint8_t adr, uint8_t mask)
 void enc28j60_read_buffer(uint8_t *buf, uint16_t len)
 {
 	enc28j60_select();
-	enc28j60_tx(ENC28J60_SPI_RBM);
-	while(len--)
-		*(buf++) = enc28j60_rx();
+	enc28j60_tx(ENC28J60_SPI_RBM,1);
+	enc28j60_rx(buf,len);
 	enc28j60_release();
 }
 
@@ -148,9 +143,8 @@ void enc28j60_read_buffer(uint8_t *buf, uint16_t len)
 void enc28j60_write_buffer(uint8_t *buf, uint16_t len)
 {
 	enc28j60_select();
-	enc28j60_tx(ENC28J60_SPI_WBM);
-	while(len--)
-		enc28j60_tx(*(buf++));
+	enc28j60_tx(ENC28J60_SPI_WBM,1);
+	enc28j60_tx_non_copy(buf,len);
 	enc28j60_release();
 }
 
@@ -159,8 +153,7 @@ uint16_t enc28j60_read_phy(uint8_t adr)
 {
 	enc28j60_wcr(MIREGADR, adr);
 	enc28j60_bfs(MICMD, MICMD_MIIRD);
-	while(enc28j60_rcr(MISTAT) & MISTAT_BUSY)
-		;
+	while(enc28j60_rcr(MISTAT) & MISTAT_BUSY);
 	enc28j60_bfc(MICMD, MICMD_MIIRD);
 	return enc28j60_rcr16(MIRD);
 }
@@ -170,73 +163,23 @@ void enc28j60_write_phy(uint8_t adr, uint16_t data)
 {
 	enc28j60_wcr(MIREGADR, adr);
 	enc28j60_wcr16(MIWR, data);
-	while(enc28j60_rcr(MISTAT) & MISTAT_BUSY)
-		;
+	while(enc28j60_rcr(MISTAT) & MISTAT_BUSY);
 }
 
 
-/*
- * Init & packet Rx/Tx
- */
 
 void enc28j60_init(uint8_t *macadr)
 {
-
-
-	// Initialize SPI
-	/* MAKE IT BY STM32 CUBE MX
-
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-
-	GPIO_InitTypeDef GPIO_InitStruct;
-
-	// MOSI & CLK
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-	GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	// MISO
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_14;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-	GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	// SS
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-	GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	// RESET
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_7;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-	GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-	SPI_InitTypeDef SPI_InitStruct;
-
-	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
-	SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-	SPI_InitStruct.SPI_Mode = SPI_Mode_Master;
-	SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;
-	SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;
-	SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;
-	SPI_InitStruct.SPI_NSS = SPI_NSS_Soft;
-	SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
-	SPI_InitStruct.SPI_CRCPolynomial = 7;
-	SPI_Init(SPI2, &SPI_InitStruct);
-
-
-	SPI_Cmd(SPI2, ENABLE);
-
-	*/
+    /**
+     * SPI  initialized with parameters (default)
+     * - SPI2 controller
+     * 	-- MOSI 13 port B
+     * 	-- SCK 15 port B
+     * 	-- MISO 14 port B
+     * - GPIO
+     *  -- SS 12 port B
+     *  -- reset 6 port C
+     */
 
 	enc28j60_release();
 
