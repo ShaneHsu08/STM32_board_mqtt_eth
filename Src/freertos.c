@@ -60,8 +60,13 @@
 #include "uip.h"
 #include "uip_arp.h"
 #include "enc28j60.h"
-#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
+#include "services/sntp.h"
+
+
+#ifndef BUF
+#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+#endif
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -221,7 +226,14 @@ void iwdtTaskFunction(void const * argument)
 #else
 
 	for (;;) {
-		osDelay(portMAX_DELAY);
+		osDelay(1000);
+		sntp_makeQuery();
+
+		osDelay(1000);
+		if(sntp_state.applicationState==SNTP_DONE){
+			char * t = ctime( ( const time_t* ) &(sntp_state.timeStamp));
+			LOG(LOG_MSG,t,strlen(t));
+		}
 	}
 #endif
 
@@ -253,7 +265,7 @@ void vTask_stack_periodic(void const * argument)
 				uip_udp_periodic(i);
 				if(uip_len > 0) {
 					uip_arp_out();
-					network_send();
+					enc28j60_send_packet((uint8_t *) uip_buf, uip_len);
 				}
 			}
 	#endif /* UIP_UDP */

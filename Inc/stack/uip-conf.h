@@ -27,7 +27,7 @@ typedef unsigned short uip_stats_t;
 #define UIP_CONF_LOGGING         0
 
 // UDP support off
-#define UIP_CONF_UDP             0
+#define UIP_CONF_UDP             1
 
 // Check UDP checksum
 #define UIP_CONF_UDP_CHECKSUMS   1
@@ -35,6 +35,9 @@ typedef unsigned short uip_stats_t;
 // Stack stats on
 #define UIP_CONF_STATISTICS      1
 
+
+#include "services/sntp.h"
+#include "services/udp_connection_handler.h"
 
 /*#include "smtp.h"*/
 #include "hello-world.h"
