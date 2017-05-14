@@ -275,7 +275,7 @@ void vTask_stack_main(void const * argument)
   /* Infinite loop */
 	volatile uint32_t st;
 
-
+ //TODO integrate with incomming intrerupt  from enc to make it faster
 	for (;;) {
 		uip_len = enc28j60_recv_packet((uint8_t *) uip_buf, UIP_BUFSIZE);
 
