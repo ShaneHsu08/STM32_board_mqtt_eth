@@ -55,6 +55,7 @@
 #include "uip_arp.h"
 #include "enc28j60.h"
 #include "services/sntp.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -127,6 +128,7 @@ int main(void)
 
   uip_ipaddr(ipaddr, 150,254,183,15);
   sntp_init(ipaddr);
+  http_server_init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

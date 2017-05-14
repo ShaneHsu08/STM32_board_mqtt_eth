@@ -1,9 +1,12 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.FootprintOK=true
+FREERTOS.INCLUDE_eTaskGetState=1
+FREERTOS.INCLUDE_pcTaskGetTaskName=1
 FREERTOS.INCLUDE_uxTaskGetStackHighWaterMark=1
-FREERTOS.IPParameters=Tasks01,FootprintOK,configGENERATE_RUN_TIME_STATS,configMAX_TASK_NAME_LEN,configTOTAL_HEAP_SIZE,INCLUDE_uxTaskGetStackHighWaterMark
+FREERTOS.INCLUDE_xTaskGetCurrentTaskHandle=1
+FREERTOS.IPParameters=Tasks01,FootprintOK,configGENERATE_RUN_TIME_STATS,configMAX_TASK_NAME_LEN,configTOTAL_HEAP_SIZE,INCLUDE_uxTaskGetStackHighWaterMark,INCLUDE_eTaskGetState,INCLUDE_xTaskGetCurrentTaskHandle,INCLUDE_pcTaskGetTaskName
 FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LPS331Measu,2,128,LPS331MeasureFunction,Default,NULL,Dynamic,NULL,NULL;iwdtTask,3,256,iwdtTaskFunction,Default,NULL,Dynamic,NULL,NULL;stack_per,2,512,vTask_stack_periodic,Default,NULL,Dynamic,NULL,NULL;stack,2,512,vTask_stack_main,Default,NULL,Dynamic,NULL,NULL;time_update,2,128,sntpTimeUpdateTask,As external,NULL,Dynamic,NULL,NULL
-FREERTOS.configGENERATE_RUN_TIME_STATS=0
+FREERTOS.configGENERATE_RUN_TIME_STATS=1
 FREERTOS.configMAX_TASK_NAME_LEN=12
 FREERTOS.configTOTAL_HEAP_SIZE=9000
 File.Version=6

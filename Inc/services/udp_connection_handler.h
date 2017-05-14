@@ -11,8 +11,6 @@
 
 #include "sntp.h"
 
-
-
 void udp_appcall_custom();
 
 #define UIP_UDP_APPCALL udp_appcall_custom

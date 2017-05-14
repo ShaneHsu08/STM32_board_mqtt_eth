@@ -63,6 +63,7 @@
 #include "enc28j60.h"
 
 #include "services/sntp.h"
+#include "services/http_server.h"
 
 
 #ifndef BUF
@@ -97,6 +98,21 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
+void configureTimerForRunTimeStats(void);
+unsigned long getRunTimeCounterValue(void);
+
+/* USER CODE BEGIN 1 */
+/* Functions needed when configGENERATE_RUN_TIME_STATS is on */
+__weak void configureTimerForRunTimeStats(void)
+{
+
+}
+
+__weak unsigned long getRunTimeCounterValue(void)
+{
+return 0;
+}
+/* USER CODE END 1 */
 
 /* Init FreeRTOS */
 
@@ -292,11 +308,10 @@ void vTask_stack_main(void const * argument)
 {
   /* USER CODE BEGIN vTask_stack_main */
   /* Infinite loop */
-	volatile uint32_t st;
 
  //TODO integrate with incomming intrerupt  from enc to make it faster
 	for (;;) {
-		vTaskDelay(100);
+		vTaskDelay(10);
 		uip_len = enc28j60_recv_packet((uint8_t *) uip_buf, UIP_BUFSIZE);
 
 		if (uip_len > 0) {
@@ -315,7 +330,6 @@ void vTask_stack_main(void const * argument)
 			}
 		}
 		taskYIELD();
-		st = uxTaskGetStackHighWaterMark(NULL);
 	}
   /* USER CODE END vTask_stack_main */
 }

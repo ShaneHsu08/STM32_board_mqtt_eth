@@ -91,6 +91,10 @@
     #include <stdint.h>
     #include "main.h" 
     extern uint32_t SystemCoreClock;
+/* USER CODE BEGIN 0 */   	      
+    extern void configureTimerForRunTimeStats(void);
+    extern unsigned long getRunTimeCounterValue(void);  
+/* USER CODE END 0 */       
 #endif
 
 #define configUSE_PREEMPTION                     1
@@ -106,6 +110,7 @@
 #define configUSE_16_BIT_TICKS                   0
 #define configUSE_MUTEXES                        1
 #define configQUEUE_REGISTRY_SIZE                8
+#define configGENERATE_RUN_TIME_STATS            1
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0
@@ -122,7 +127,10 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelay                  1
 #define INCLUDE_xTaskGetSchedulerState      1
 
+#define INCLUDE_pcTaskGetTaskName           1
 #define INCLUDE_uxTaskGetStackHighWaterMark 1
+#define INCLUDE_xTaskGetCurrentTaskHandle   1
+#define INCLUDE_eTaskGetState               1
 
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
@@ -163,6 +171,12 @@ standard names. */
 /* IMPORTANT: This define MUST be commented when used with STM32Cube firmware, 
               to prevent overwriting SysTick_Handler defined within STM32Cube HAL */
 /* #define xPortSysTickHandler SysTick_Handler */
+
+/* USER CODE BEGIN 2 */    
+/* Definitions needed when configGENERATE_RUN_TIME_STATS is on */
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS configureTimerForRunTimeStats
+#define portGET_RUN_TIME_COUNTER_VALUE getRunTimeCounterValue    
+/* USER CODE END 2 */
 
 /* USER CODE BEGIN Defines */   	      
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */

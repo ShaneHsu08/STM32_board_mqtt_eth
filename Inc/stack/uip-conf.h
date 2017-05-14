@@ -36,11 +36,12 @@ typedef unsigned short uip_stats_t;
 #define UIP_CONF_STATISTICS      1
 
 
-#include "services/sntp.h"
+
 #include "services/udp_connection_handler.h"
+#include "services/tcp_connection_handler.h"
 
 /*#include "smtp.h"*/
-#include "hello-world.h"
+//#include "hello-world.h"
 /*#include "telnetd.h"*/
 //#include "webserver.h"
 /*#include "dhcpc.h"*/

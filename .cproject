@@ -116,12 +116,13 @@
 						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.721713814" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
 							<option id="com.atollic.truestudio.toolchain_options.mcu.2021636142.1616754985" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.2021636142" />
 							<option id="com.atollic.truestudio.toolchain_options.vendor.1126499077.235665314" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.1126499077" />
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform" isAbstract="false" name="Debug platform" osList="all" superClass="com.atollic.truestudio.exe.debug.toolchain.platform" />
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.1783897049" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1545899283">
-								<option id="com.atollic.truestudio.common_options.target.fpu.1042150781" superClass="com.atollic.truestudio.common_options.target.fpu" useByScannerDiscovery="false" value="com.atollic.truestudio.common_options.target.fpu.soft" valueType="enumerated" />
+								<option id="com.atollic.truestudio.common_options.target.fpu.1042150781" name="Floating point" superClass="com.atollic.truestudio.common_options.target.fpu" useByScannerDiscovery="false" value="com.atollic.truestudio.common_options.target.fpu.soft" valueType="enumerated" />
 								<inputType id="com.atollic.truestudio.as.input.1537748539" name="Input" superClass="com.atollic.truestudio.as.input" />
 							</tool>
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.2108807330" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447">
-								<option id="com.atollic.truestudio.gcc.directories.select.835529059" superClass="com.atollic.truestudio.gcc.directories.select" useByScannerDiscovery="false" valueType="includePath">
+								<option id="com.atollic.truestudio.gcc.directories.select.835529059" name="Include path" superClass="com.atollic.truestudio.gcc.directories.select" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Inc" />
 									<listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
 									<listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc" />
@@ -178,6 +179,37 @@
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.ldcc.1226353026" name="C++ Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ldcc.428260" />
 							<tool id="com.atollic.truestudio.ar.base.524120819" name="Archiver" superClass="com.atollic.truestudio.ar.base.1095128652" />
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.886883538" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput.839033486" />
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="com.atollic.truestudio.exe.debug.1518366166.1772485824" name="/" resourcePath="Inc/services">
+						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.1407802842" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
+							<option id="com.atollic.truestudio.toolchain_options.mcu.2021636142.373126826" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.2021636142" />
+							<option id="com.atollic.truestudio.toolchain_options.vendor.1126499077.346992784" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.1126499077" />
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.1162608395" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1545899283">
+								<inputType id="com.atollic.truestudio.as.input.281424757" name="Input" superClass="com.atollic.truestudio.as.input" />
+							</tool>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.1174301908" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447">
+								<option id="com.atollic.truestudio.gcc.directories.select.1443621787" superClass="com.atollic.truestudio.gcc.directories.select" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="../Inc" />
+									<listOptionValue builtIn="false" value="../Inc/services" />
+									<listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
+									<listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc" />
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
+									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include" />
+									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS" />
+									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include" />
+									<listOptionValue builtIn="false" value="../Inc/tools" />
+									<listOptionValue builtIn="false" value="../Inc/deviceDrivers" />
+									<listOptionValue builtIn="false" value="../Inc/stack" />
+								</option>
+								<inputType id="com.atollic.truestudio.gcc.input.1038480490" superClass="com.atollic.truestudio.gcc.input" />
+							</tool>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ld.1595367956" name="C Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ld.1444973427" />
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gpp.1744562004" name="C++ Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gpp.981298185" />
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ldcc.1774117522" name="C++ Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ldcc.428260" />
+							<tool id="com.atollic.truestudio.ar.base.177139922" name="Archiver" superClass="com.atollic.truestudio.ar.base.1095128652" />
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.416913880" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput.839033486" />
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
