@@ -50,6 +50,7 @@
 #include "userDefines.h"
 #include "usart.h"
 #include "i2c.h"
+#include "rtc.h"
 //#include "iwdg.h"
 #include "logger.h"
 #include "LPS331AP.h"
@@ -75,6 +76,7 @@ osThreadId LPS331MeasuHandle;
 osThreadId iwdtTaskHandle;
 osThreadId stack_perHandle;
 osThreadId stackHandle;
+osThreadId time_updateHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -86,6 +88,7 @@ void LPS331MeasureFunction(void const * argument);
 void iwdtTaskFunction(void const * argument);
 void vTask_stack_periodic(void const * argument);
 void vTask_stack_main(void const * argument);
+extern void sntpTimeUpdateTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -125,7 +128,7 @@ void MX_FREERTOS_Init(void) {
   LPS331MeasuHandle = osThreadCreate(osThread(LPS331Measu), NULL);
 
   /* definition and creation of iwdtTask */
-  osThreadDef(iwdtTask, iwdtTaskFunction, osPriorityRealtime, 0, 128);
+  osThreadDef(iwdtTask, iwdtTaskFunction, osPriorityRealtime, 0, 256);
   iwdtTaskHandle = osThreadCreate(osThread(iwdtTask), NULL);
 
   /* definition and creation of stack_per */
@@ -135,6 +138,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of stack */
   osThreadDef(stack, vTask_stack_main, osPriorityHigh, 0, 512);
   stackHandle = osThreadCreate(osThread(stack), NULL);
+
+  /* definition and creation of time_update */
+  osThreadDef(time_update, sntpTimeUpdateTask, osPriorityHigh, 0, 128);
+  time_updateHandle = osThreadCreate(osThread(time_update), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -227,13 +234,13 @@ void iwdtTaskFunction(void const * argument)
 
 	for (;;) {
 		osDelay(1000);
-		sntp_makeQuery();
+		char buf [10];
 
-		osDelay(1000);
-		if(sntp_state.applicationState==SNTP_DONE){
-			char * t = ctime( ( const time_t* ) &(sntp_state.timeStamp));
-			LOG(LOG_MSG,t,strlen(t));
-		}
+		RTC_TimeTypeDef time;
+		HAL_RTC_GetTime(&hrtc,&time,RTC_FORMAT_BIN);
+
+		int count = sprintf(buf,"%d:%d:%d",time.Hours,time.Minutes,time.Seconds);
+		LOG(LOG_MSG, buf, count);
 	}
 #endif
 
@@ -289,6 +296,7 @@ void vTask_stack_main(void const * argument)
 
  //TODO integrate with incomming intrerupt  from enc to make it faster
 	for (;;) {
+		vTaskDelay(100);
 		uip_len = enc28j60_recv_packet((uint8_t *) uip_buf, UIP_BUFSIZE);
 
 		if (uip_len > 0) {
